@@ -1,11 +1,15 @@
 function ChatBox({ chat }) {
   return (
     <div className="chatbox">
-      {chat.map((msg, index) => (
-        <div key={index} className={msg.sender}>
-          {msg.text}
-        </div>
-      ))}
+      {chat.length === 0 ? (
+        <div className="emptyState">👋 Start a conversation!</div>
+      ) : (
+        chat.map((msg, index) => (
+          <div key={index} className={msg.sender}>
+            {msg.text}
+          </div>
+        ))
+      )}
     </div>
   );
 }

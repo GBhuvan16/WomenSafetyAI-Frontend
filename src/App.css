@@ -104,6 +104,13 @@ input {
 
 /* Send Button */
 
+.emptyState {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+    margin-top: 40px;
+}
+
 button {
     padding: 12px 18px;
     border-radius: 12px;
