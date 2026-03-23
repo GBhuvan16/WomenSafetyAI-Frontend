@@ -4,7 +4,10 @@ import Map from "./Map";
 
 let watchId = null;
 
-// 📞 CALL FUNCTION (INDIA POLICE)
+// 🌐 BACKEND URL (IMPORTANT)
+const API = "https://womensafetyai-6.onrender.com";
+
+// 📞 CALL FUNCTION
 const callEmergency = () => {
   window.open("tel:100");
 };
@@ -18,10 +21,8 @@ function App() {
   // 🚨 SOS FUNCTION
   const handleSOS = () => {
 
-    // 📞 Call Police
     callEmergency();
 
-    // 📍 Track location
     watchId = navigator.geolocation.watchPosition(
       (pos) => {
 
@@ -29,27 +30,28 @@ function App() {
         const lng = pos.coords.longitude;
 
         const link = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-
         const message = `🚨 EMERGENCY!\n📍 ${link}`;
 
-        // 📱 WhatsApp contact (CHANGE NUMBER)
         const phone = "917075526273";
 
+        // ✅ 1. SEND TO BACKEND FIRST (FIX)
+        fetch(`${API}/location`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ lat, lng })
+        })
+        .then(() => console.log("Location sent"))
+        .catch(() => console.log("Error sending location"));
+
+        // ✅ 2. OPEN WHATSAPP AFTER
         if (!window.sosSent) {
           window.open(
             `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
           );
           window.sosSent = true;
         }
-
-        // 📡 Send to backend
-        fetch("https://womensafetyai-6.onrender.com/location", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ lat, lng })
-        });
 
       },
       () => alert("❌ Location error"),
@@ -75,28 +77,34 @@ function App() {
 
     setMessages(prev => [...prev, { text: msg, type: "user" }]);
 
-    const res = await fetch("https://womensafetyai-6.onrender.com/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message: msg })
-    });
+    try {
+      const res = await fetch(`${API}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: msg })
+      });
 
-    const data = await res.text();
+      const data = await res.text();
 
-    setMessages(prev => [...prev, { text: data, type: "bot" }]);
+      setMessages(prev => [...prev, { text: data, type: "bot" }]);
 
-    const lowerMsg = msg.toLowerCase();
+      const lowerMsg = msg.toLowerCase();
 
-    if (
-      data.toLowerCase().includes("sos") ||
-      lowerMsg.includes("help") ||
-      lowerMsg.includes("danger") ||
-      lowerMsg.includes("sos") ||
-      lowerMsg.includes("emergency")
-    ) {
-      handleSOS();
+      if (
+        data.toLowerCase().includes("sos") ||
+        lowerMsg.includes("help") ||
+        lowerMsg.includes("danger") ||
+        lowerMsg.includes("sos") ||
+        lowerMsg.includes("emergency")
+      ) {
+        handleSOS();
+      }
+
+    } catch (error) {
+      console.log("Backend error", error);
+      alert("❌ Server not responding");
     }
   };
 
@@ -149,10 +157,8 @@ function App() {
         ))}
       </div>
 
-      {/* 🗺️ MAP */}
       <Map />
 
-      {/* 🔘 BUTTONS */}
       <div className="buttonGroup">
 
         <button className="sosButton" onClick={handleSOS}>
@@ -172,7 +178,6 @@ function App() {
 
       </div>
 
-      {/* INPUT */}
       <div className="inputArea">
         <input
           value={input}
