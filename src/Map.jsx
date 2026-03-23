@@ -21,16 +21,16 @@ function MapComponent() {
   };
 
   return (
-    <div style={{ margin: "10px" }}>
-      <button onClick={getLocation}>
-        📍 Show My Location
-      </button>
+    <div style={{ margin: "10px", fontSize:"12px" }}>
+     <button style={{ fontSize: "25px", padding: "6px 10px" }} onClick={getLocation}>
+  📍
+</button>
 
       {position && (
         <MapContainer
           center={position}
           zoom={15}
-          style={{ height: "300px", width: "100%", marginTop: "10px", borderRadius: "10px" }}
+          style={{ height: "200px", width: "100%", marginTop: "10px", borderRadius: "10px" }}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           

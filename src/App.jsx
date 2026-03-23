@@ -1,92 +1,188 @@
 import { useState } from "react";
 import "./App.css";
-import MapComponent from "./Map";
-import { sendMessage } from "./services/api";
+import Map from "./Map";
+
+let watchId = null;
+
+// 📞 CALL FUNCTION (INDIA POLICE)
+const callEmergency = () => {
+  window.open("tel:100");
+};
 
 function App() {
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const userMsg = { text: input, type: "user" };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    setLoading(true);
-
-    try {
-      const data = await sendMessage(input);
-      const botMsg = { text: data, type: "bot" };
-      setMessages((prev) => [...prev, botMsg]);
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        { text: "⚠️ Could not reach server. Try again.", type: "bot" },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 🚨 SOS FUNCTION
   const handleSOS = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
-    }
 
-    navigator.geolocation.getCurrentPosition(
+    // 📞 Call Police
+    callEmergency();
+
+    // 📍 Track location
+    watchId = navigator.geolocation.watchPosition(
       (pos) => {
+
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
-        const link = `https://maps.google.com/?q=${lat},${lng}`;
-        const message = `🚨 EMERGENCY! I need help. I'm in danger 🆘.\nMy location: ${link}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+
+        const link = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+
+        const message = `🚨 EMERGENCY!\n📍 ${link}`;
+
+        // 📱 WhatsApp contact (CHANGE NUMBER)
+        const phone = "917075526273";
+
+        if (!window.sosSent) {
+          window.open(
+            `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+          );
+          window.sosSent = true;
+        }
+
+        // 📡 Send to backend
+        fetch("http://localhost:8080/location", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ lat, lng })
+        });
+
       },
-      (err) => {
-        alert("Location access denied. Please enable location permissions.");
-        console.error("Geolocation error:", err);
+      () => alert("❌ Location error"),
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0
       }
     );
   };
 
+  // 🛑 STOP
+  const stopSOS = () => {
+    if (watchId) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+      window.sosSent = false;
+      alert("🛑 Tracking stopped");
+    }
+  };
+
+  // 💬 SEND MESSAGE
+  const sendToServer = async (msg) => {
+
+    setMessages(prev => [...prev, { text: msg, type: "user" }]);
+
+    const res = await fetch("http://localhost:8080/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: msg })
+    });
+
+    const data = await res.text();
+
+    setMessages(prev => [...prev, { text: data, type: "bot" }]);
+
+    const lowerMsg = msg.toLowerCase();
+
+    if (
+      data.toLowerCase().includes("sos") ||
+      lowerMsg.includes("help") ||
+      lowerMsg.includes("danger") ||
+      lowerMsg.includes("sos") ||
+      lowerMsg.includes("emergency")
+    ) {
+      handleSOS();
+    }
+  };
+
+  const sendMessage = () => {
+    if (!input) return;
+    sendToServer(input);
+    setInput("");
+  };
+
+  // 🎤 VOICE
+  const startListening = () => {
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Use Chrome");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+
+    setListening(true);
+    recognition.start();
+
+    recognition.onresult = (event) => {
+      const voiceText = event.results[0][0].transcript;
+      setListening(false);
+      sendToServer(voiceText);
+    };
+
+    recognition.onerror = () => {
+      setListening(false);
+      alert("Voice error");
+    };
+  };
+
   return (
     <div className="container">
-      <div className="header">🚨 SAFETY AI ASSISTANT</div>
+
+      <div className="header">
+        🚨 Smart Safety AI
+      </div>
 
       <div className="chatbox">
-        {messages.length === 0 && (
-          <div className="emptyState">
-            👋 Hi! How can I help you stay safe today?
-          </div>
-        )}
         {messages.map((msg, i) => (
           <div key={i} className={msg.type}>
             {msg.text}
           </div>
         ))}
-        {loading && <div className="bot">...</div>}
       </div>
 
-      <MapComponent />
+      {/* 🗺️ MAP */}
+      <Map />
 
-      <button className="sosButton" onClick={handleSOS}>
-        🚨 SOS — Send Emergency Alert
-      </button>
+      {/* 🔘 BUTTONS */}
+      <div className="buttonGroup">
 
+        <button className="sosButton" onClick={handleSOS}>
+          🚨
+        </button>
+
+        <button
+          className={`voiceButton ${listening ? "listening" : ""}`}
+          onClick={startListening}
+        >
+          🎤
+        </button>
+
+        <button className="stopButton" onClick={stopSOS}>
+          🛑
+        </button>
+
+      </div>
+
+      {/* INPUT */}
       <div className="inputArea">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Type a message..."
-          disabled={loading}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Type or speak..."
         />
-        <button onClick={handleSend} disabled={loading}>
-          {loading ? "..." : "Send"}
-        </button>
+        <button onClick={sendMessage}>Send</button>
       </div>
+
     </div>
   );
 }
