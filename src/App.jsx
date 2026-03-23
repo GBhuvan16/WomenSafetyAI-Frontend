@@ -4,10 +4,10 @@ import Map from "./Map";
 
 let watchId = null;
 
-// 🌐 BACKEND URL (IMPORTANT)
+// ✅ CHANGE 1: Use deployed backend (NOT localhost)
 const API = "https://womensafetyai-6.onrender.com";
 
-// 📞 CALL FUNCTION
+// 📞 Call Police
 const callEmergency = () => {
   window.open("tel:100");
 };
@@ -34,7 +34,7 @@ function App() {
 
         const phone = "917075526273";
 
-        // ✅ 1. SEND TO BACKEND FIRST (FIX)
+        // ✅ CHANGE 2: Send to backend FIRST
         fetch(`${API}/location`, {
           method: "POST",
           headers: {
@@ -43,9 +43,9 @@ function App() {
           body: JSON.stringify({ lat, lng })
         })
         .then(() => console.log("Location sent"))
-        .catch(() => console.log("Error sending location"));
+        .catch(() => console.log("Location error"));
 
-        // ✅ 2. OPEN WHATSAPP AFTER
+        // ✅ THEN open WhatsApp
         if (!window.sosSent) {
           window.open(
             `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
@@ -62,7 +62,7 @@ function App() {
     );
   };
 
-  // 🛑 STOP
+  // 🛑 STOP SOS
   const stopSOS = () => {
     if (watchId) {
       navigator.geolocation.clearWatch(watchId);
@@ -75,7 +75,12 @@ function App() {
   // 💬 SEND MESSAGE
   const sendToServer = async (msg) => {
 
+    console.log("Sending:", msg); // ✅ DEBUG
+
     setMessages(prev => [...prev, { text: msg, type: "user" }]);
+
+    // ✅ CHANGE 3: Show loading (for Render delay)
+    setMessages(prev => [...prev, { text: "⏳ Waiting for server...", type: "bot" }]);
 
     try {
       const res = await fetch(`${API}/chat`, {
@@ -86,7 +91,11 @@ function App() {
         body: JSON.stringify({ message: msg })
       });
 
+      console.log("Response received"); // ✅ DEBUG
+
       const data = await res.text();
+
+      console.log("Data:", data); // ✅ DEBUG
 
       setMessages(prev => [...prev, { text: data, type: "bot" }]);
 
@@ -103,8 +112,8 @@ function App() {
       }
 
     } catch (error) {
-      console.log("Backend error", error);
-      alert("❌ Server not responding");
+      console.log("ERROR:", error); // ✅ DEBUG
+      alert("❌ Backend not responding");
     }
   };
 
