@@ -43,7 +43,7 @@ function App() {
         }
 
         // 📡 Send to backend
-        fetch("http://localhost:8080/location", {
+        fetch("https://womensafetyai-6.onrender.com/location", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -75,7 +75,7 @@ function App() {
 
     setMessages(prev => [...prev, { text: msg, type: "user" }]);
 
-    const res = await fetch("http://localhost:8080/chat", {
+    const res = await fetch("https://womensafetyai-6.onrender.com/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
