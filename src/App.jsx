@@ -5,7 +5,7 @@ import Map from "./Map";
 let watchId = null;
 
 // ✅ CHANGE 1: Use deployed backend (NOT localhost)
-const API = "https://womensafetyai-6.onrender.com";
+const API = "https://womensafetyai-7.onrender.com";
 
 // 📞 Call Police
 const callEmergency = () => {
@@ -18,7 +18,7 @@ function App() {
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
 
-  // 🚨 SOS FUNCTION
+  
   const handleSOS = () => {
 
     callEmergency();
