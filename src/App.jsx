@@ -4,7 +4,7 @@ import Map from "./Map";
 
 let watchId = null;
 
-// ✅ CHANGE 1: Use deployed backend (NOT localhost)
+// 🌐 Backend URL
 const API = "https://womensafetyai-7.onrender.com";
 
 // 📞 Call Police
@@ -13,51 +13,48 @@ const callEmergency = () => {
 };
 
 function App() {
-
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
+  const [sosSent, setSosSent] = useState(false);
 
-  
+  // 🚨 SOS FUNCTION
   const handleSOS = () => {
-
     callEmergency();
 
     watchId = navigator.geolocation.watchPosition(
       (pos) => {
-
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
 
         const link = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
         const message = `🚨 EMERGENCY!\n📍 ${link}`;
 
-        const phone = "917075526273";
+        const phone = "917075526273"; // change if needed
 
-        // ✅ CHANGE 2: Send to backend FIRST
+        // ✅ Send location to backend
         fetch(`${API}/location`, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ lat, lng })
+          body: JSON.stringify({ lat, lng }),
         })
-        .then(() => console.log("Location sent"))
-        .catch(() => console.log("Location error"));
+          .then(() => console.log("Location sent"))
+          .catch(() => console.log("Location error"));
 
-        // ✅ THEN open WhatsApp
-        if (!window.sosSent) {
+        // ✅ Open WhatsApp only once
+        if (!sosSent) {
           window.open(
             `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
           );
-          window.sosSent = true;
+          setSosSent(true);
         }
-
       },
       () => alert("❌ Location error"),
       {
         enableHighAccuracy: true,
-        maximumAge: 0
+        maximumAge: 0,
       }
     );
   };
@@ -67,53 +64,57 @@ function App() {
     if (watchId) {
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
-      window.sosSent = false;
+      setSosSent(false);
       alert("🛑 Tracking stopped");
     }
   };
 
   // 💬 SEND MESSAGE
   const sendToServer = async (msg) => {
-
-    console.log("Sending:", msg); // ✅ DEBUG
-
-    setMessages(prev => [...prev, { text: msg, type: "user" }]);
-
-    // ✅ CHANGE 3: Show loading (for Render delay)
-    setMessages(prev => [...prev, { text: "⏳ Waiting for server...", type: "bot" }]);
+    // ✅ Add user + loading together (fix bug)
+    setMessages((prev) => [
+      ...prev,
+      { text: msg, type: "user" },
+      { text: "⏳ Waiting for server...", type: "bot" },
+    ]);
 
     try {
       const res = await fetch(`${API}/chat`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: msg })
+        body: JSON.stringify({ message: msg }),
       });
-
-      console.log("Response received"); // ✅ DEBUG
 
       const data = await res.text();
 
-      console.log("Data:", data); // ✅ DEBUG
-
-      setMessages(prev => [...prev, { text: data, type: "bot" }]);
+      // ✅ Remove loading + add response
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated.pop(); // remove loading
+        return [...updated, { text: data, type: "bot" }];
+      });
 
       const lowerMsg = msg.toLowerCase();
 
+      // 🔥 AUTO SOS TRIGGER
       if (
         data.toLowerCase().includes("sos") ||
         lowerMsg.includes("help") ||
         lowerMsg.includes("danger") ||
-        lowerMsg.includes("sos") ||
         lowerMsg.includes("emergency")
       ) {
         handleSOS();
       }
-
     } catch (error) {
-      console.log("ERROR:", error); // ✅ DEBUG
       alert("❌ Backend not responding");
+
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated.pop();
+        return [...updated, { text: "Server error", type: "bot" }];
+      });
     }
   };
 
@@ -123,9 +124,8 @@ function App() {
     setInput("");
   };
 
-  // 🎤 VOICE
+  // 🎤 VOICE INPUT
   const startListening = () => {
-
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -153,10 +153,7 @@ function App() {
 
   return (
     <div className="container">
-
-      <div className="header">
-        🚨 Smart Safety AI
-      </div>
+      <div className="header">🚨 Smart Safety AI</div>
 
       <div className="chatbox">
         {messages.map((msg, i) => (
@@ -169,7 +166,6 @@ function App() {
       <Map />
 
       <div className="buttonGroup">
-
         <button className="sosButton" onClick={handleSOS}>
           🚨
         </button>
@@ -184,7 +180,6 @@ function App() {
         <button className="stopButton" onClick={stopSOS}>
           🛑
         </button>
-
       </div>
 
       <div className="inputArea">
@@ -196,7 +191,6 @@ function App() {
         />
         <button onClick={sendMessage}>Send</button>
       </div>
-
     </div>
   );
 }
