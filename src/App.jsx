@@ -146,40 +146,60 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <div className="header">🚨 Smart Safety AI</div>
-
-      <div className="chatbox">
-        {messages.map((msg, i) => (
-          <div key={i} className={msg.type}>
-            {msg.text}
-          </div>
-        ))}
-      </div>
-
-      <Map />
-
-      <div className="buttonGroup">
-        <button className="sosButton" onClick={handleSOS}>🚨</button>
-        <button
-          className={`voiceButton ${listening ? "listening" : ""}`}
-          onClick={startListening}
-        >
-          🎤
-        </button>
-        <button className="stopButton" onClick={stopSOS}>🛑</button>
-      </div>
-
-      <div className="inputArea">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Type or speak..."
-        />
-        <button onClick={sendMessage}>Send</button>
+    
+  <div className="container">
+    
+    {/* HEADER */}
+    <div className="header">
+      🚨 Smart Safety AI
+      <div style={{ fontSize: "12px", opacity: 0.7 }}>
+        Your personal safety companion
       </div>
     </div>
+
+    {/* CHAT */}
+    <div className="chatbox">
+      {messages.map((msg, i) => (
+        <div key={i} className={msg.type}>
+          {msg.text}
+        </div>
+      ))}
+    </div>
+
+    {/* MAP */}
+    <Map />
+
+    {/* BUTTONS */}
+    <div className="buttonGroup">
+      <button
+        className={`voiceButton ${listening ? "listening" : ""}`}
+        onClick={startListening}
+      >
+        🎤
+      </button>
+
+      <button className="stopButton" onClick={stopSOS}>
+        🛑
+      </button>
+    </div>
+
+    {/* FLOATING SOS */}
+    <button className="floatingSOS" onClick={handleSOS}>
+      🚨
+    </button>
+
+    {/* INPUT */}
+    <div className="inputArea">
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        placeholder="Type or speak..."
+      />
+      <button onClick={sendMessage}>Send</button>
+    </div>
+  </div>
+
   );
 }
 

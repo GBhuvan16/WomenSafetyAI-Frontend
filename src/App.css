@@ -1,77 +1,92 @@
+/* 🌈 Background */
+
 body {
     margin: 0;
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #1e1e2f, #2c2c54);
+    background: linear-gradient(135deg, #141e30, #243b55);
+    color: white;
 }
 
 
-/* CONTAINER */
+/* 📦 Main container */
 
 .container {
     max-width: 420px;
-    margin: 20px auto;
-    border-radius: 25px;
-    backdrop-filter: blur(15px);
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    overflow: hidden;
-    color: white;
+    margin: auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 
-/* HEADER */
+/* 🧠 Header */
 
 .header {
-    padding: 15px;
     text-align: center;
+    font-size: 22px;
     font-weight: bold;
-    font-size: 18px;
-    background: linear-gradient(135deg, #ff416c, #ff4b2b);
-    letter-spacing: 1px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
 }
 
 
-/* CHAT */
+/* 💬 Chatbox */
 
 .chatbox {
-    height: 220px;
-    overflow-y: auto;
+    flex: 1;
     padding: 10px;
+    overflow-y: auto;
 }
 
 
-/* CHAT BUBBLES */
+/* 👤 User message */
 
 .user {
-    background: linear-gradient(135deg, #007bff, #00c6ff);
+    text-align: right;
+    background: #00c6ff;
     padding: 10px;
-    border-radius: 20px;
-    margin: 6px;
+    border-radius: 15px;
+    margin: 5px;
+    display: inline-block;
     max-width: 70%;
-    margin-left: auto;
-    color: white;
 }
+
+
+/* 🤖 Bot message */
 
 .bot {
-    background: rgba(255, 255, 255, 0.2);
+    text-align: left;
+    background: #444;
     padding: 10px;
-    border-radius: 20px;
-    margin: 6px;
+    border-radius: 15px;
+    margin: 5px;
+    display: inline-block;
     max-width: 70%;
 }
 
 
-/* MAP */
+/* ✨ Animation */
 
-.leaflet-container {
-    height: 180px !important;
-    border-radius: 15px;
-    margin: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+.user,
+.bot {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 
-/* BUTTON GROUP */
+/* 🎯 Buttons */
 
 .buttonGroup {
     display: flex;
@@ -80,89 +95,89 @@ body {
 }
 
 
-/* BUTTON BASE */
+/* 🚨 Floating SOS button */
 
-button {
+.floatingSOS {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background: red;
     border: none;
+    font-size: 26px;
+    padding: 20px;
     border-radius: 50%;
-    width: 55px;
-    height: 55px;
-    font-size: 20px;
+    color: white;
+    box-shadow: 0 0 20px red;
     cursor: pointer;
     transition: 0.3s;
 }
 
-
-/* HOVER EFFECT */
-
-button:hover {
+.floatingSOS:hover {
     transform: scale(1.1);
 }
 
 
-/* SOS */
-
-.sosButton {
-    background: #ff3b30;
-    color: white;
-    box-shadow: 0 0 15px red;
-}
-
-
-/* VOICE */
+/* 🎤 Voice button */
 
 .voiceButton {
-    background: #007bff;
-    color: white;
+    background: #00ffcc;
+    border: none;
+    font-size: 20px;
+    padding: 15px;
+    border-radius: 50%;
+    cursor: pointer;
 }
-
-
-/* LISTENING ANIMATION */
 
 .voiceButton.listening {
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 20px rgba(0, 123, 255, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
-    }
+    background: orange;
 }
 
 
-/* STOP */
+/* 🛑 Stop button */
 
 .stopButton {
-    background: #333;
-    color: white;
+    background: gray;
+    border: none;
+    font-size: 20px;
+    padding: 15px;
+    border-radius: 50%;
+    cursor: pointer;
 }
 
 
-/* INPUT */
+/* ⌨️ Input area */
 
 .inputArea {
     display: flex;
     padding: 10px;
+    gap: 5px;
 }
+
+
+/* 🧾 Input */
 
 input {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     border-radius: 20px;
     border: none;
     outline: none;
+    font-size: 14px;
 }
 
-.inputArea button {
-    background: #28a745;
-    color: white;
-    border-radius: 20px;
-    margin-left: 5px;
+
+/* 📤 Send button */
+
+input+button {
     padding: 10px 15px;
+    border-radius: 20px;
+    border: none;
+    background: #00c6ff;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+input+button:hover {
+    background: #0096c7;
 }
